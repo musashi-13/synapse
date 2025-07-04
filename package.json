@@ -20,6 +20,7 @@
     "@tanstack/react-router": "^1.121.2",
     "@tanstack/react-router-devtools": "^1.121.2",
     "@tanstack/router-plugin": "^1.121.2",
+    "axios": "^1.10.0",
     "dotenv": "^17.0.1",
     "pg": "^8.16.3",
     "react": "^19.0.0",
