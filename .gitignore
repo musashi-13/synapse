@@ -9,3 +9,5 @@ count.txt
 .tanstack
 /backend/venv/
 /backend/summarise/__pycache__/
+pnpm-lock.yaml
+package-lock.json
