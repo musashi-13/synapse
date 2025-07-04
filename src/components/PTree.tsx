@@ -1,29 +1,36 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import * as d3 from 'd3';
-import Node from './PNode';
 import NodeLink from './PLink';
 import type { TreeNode } from '@/types/types';
+import RootNode from './RootNode';
+import Node from './PNode';
+import { bottomPromptBox } from '../atoms';
+import PromptBox from './PromptBox';
+import { useAtom } from 'jotai';
+import { dummyData } from '@/dummy-data'; // Keeping as dummyData
 
 const PTree: React.FC = () => {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null); // Store zoom object
 
   const initialNode: TreeNode = {
     id: 'root',
-    prompt: 'Enter your first prompt',
+    prompt: '',
     type: 'root',
     children: [],
     x: 0,
     y: 0,
+    height: 200,
   };
 
   const [nodes, setNodes] = React.useState<TreeNode[]>([initialNode]);
   const [links, setLinks] = React.useState<{ source: string; target: string; type: string }[]>([]);
+  const [showBottomPrompt, setShowBottomPrompt] = useAtom(bottomPromptBox);
+  const [newNodeId, setNewNodeId] = useState<string | null>(null); // Track the latest node ID for animation
 
   useEffect(() => {
-    if (!svgRef.current || !containerRef.current) {
-      return;
-    }
+    if (!svgRef.current || !containerRef.current) return;
 
     const svg = d3.select(svgRef.current);
     const width = containerRef.current.clientWidth;
@@ -34,87 +41,79 @@ const PTree: React.FC = () => {
     const g = svg.select('g');
     const zoom = d3
       .zoom<SVGSVGElement, unknown>()
-      .scaleExtent([0.5, 2])
+      .scaleExtent([0.5, 3])
       .on('zoom', (event) => {
         g.attr('transform', event.transform);
       });
 
-    svg.call(zoom).call(zoom.transform, d3.zoomIdentity.translate(width / 2, height / 2));
+    // Center the root node (width 800px, height 200px) at (0, 0)
+    const nodeWidth = 800;
+    const nodeHeight = 200;
+    svg.call(zoom).call(zoom.transform, d3.zoomIdentity.translate(width / 2 - nodeWidth / 2, height / 2 - nodeHeight / 2));
+
+    zoomRef.current = zoom; // Store the zoom object in the ref
   }, []);
 
-  const addNode = useCallback((parentId: string, type: 'followup' | 'error' | 'sibling') => {
-    console.log('addNode: Called with', { parentId, type });
-
+  const addNode = useCallback((parentId: string, type: 'followup' | 'error' | 'sibling', prompt: string, answer: string) => {
     const newNodeId = `${parentId}-${Date.now()}`;
-    console.log('addNode: Generated new node ID', newNodeId);
+    setNewNodeId(newNodeId); // Set the new node ID for animation
 
     setNodes((prevNodes) => {
-      console.log('addNode: Current nodes', prevNodes);
       const parentNode = prevNodes.find((n) => n.id === parentId);
-      if (!parentNode) {
-        console.error('addNode: Parent node not found for ID', parentId);
-        return prevNodes;
-      }
+      if (!parentNode) return prevNodes;
 
+      const nodeHeight = 200; // Fixed height for new nodes
       const newNode: TreeNode = {
         id: newNodeId,
-        prompt: 'New prompt',
+        prompt,
+        answer,
         type,
         children: [],
         x: type === 'sibling' ? parentNode.x + 200 : type === 'error' ? parentNode.x + 200 : parentNode.x,
-        y: type === 'sibling' ? parentNode.y : parentNode.y + 200,
+        y: type === 'sibling' ? parentNode.y : parentNode.y + 200 + nodeHeight, // Adjust for center anchor
+        height: nodeHeight,
       };
-      console.log('addNode: Created new node', newNode);
 
-      let updatedNodes = prevNodes;
-      if (type === 'sibling') {
-        const grandParent = prevNodes.find((n) => n.children.includes(parentId));
-        if (grandParent) {
-          console.log('addNode: Found grandparent', grandParent.id);
-          updatedNodes = prevNodes.map((node) =>
-            node.id === grandParent.id
-              ? { ...node, children: [...node.children, newNodeId] }
-              : node
-          );
-        } else {
-          console.log('addNode: No grandparent, attaching sibling to root');
-          updatedNodes = prevNodes.map((node) =>
-            node.id === 'root' ? { ...node, children: [...node.children, newNodeId] } : node
-          );
-        }
-      } else {
-        console.log('addNode: Adding child to parent', parentId);
-        updatedNodes = prevNodes.map((node) =>
-          node.id === parentId ? { ...node, children: [...node.children, newNodeId] } : node
+      const updatedNodes = prevNodes.map((node) =>
+        node.id === parentId ? { ...node, children: [...node.children, newNodeId] } : node
+      );
+
+      // Move view to new node's top edge after state update
+      if (svgRef.current && zoomRef.current) {
+        const svg = d3.select(svgRef.current);
+        const topEdgeY = newNode.y - newNode.height / 2; // Top edge of new node
+        svg.transition().duration(500).call(
+          zoomRef.current.transform,
+          d3.zoomIdentity.translate(0, -topEdgeY) // Align top edge with viewport top
         );
       }
 
-      const newNodes = [...updatedNodes, newNode];
-      console.log('addNode: Updated nodes', newNodes);
-      return newNodes;
+      return [...updatedNodes, newNode];
     });
 
-    setLinks((prevLinks) => {
-      const newLink = { source: parentId, target: newNodeId, type };
-      console.log('addNode: Adding new link', newLink);
-      return [...prevLinks, newLink];
-    });
+    setLinks((prevLinks) => [...prevLinks, { source: parentId, target: newNodeId, type }]);
   }, []);
 
-  console.log('PTree render: Current state', { nodes, links });
+  const updateNode = (updatedNode: TreeNode) => {
+    setNodes((prevNodes) => prevNodes.map((n) => (n.id === updatedNode.id ? updatedNode : n)));
+  };
+
+  // Clean up newNodeId after animation
+  useEffect(() => {
+    if (newNodeId) {
+      const timer = setTimeout(() => setNewNodeId(null), 600); // Clear after transition
+      return () => clearTimeout(timer);
+    }
+  }, [newNodeId]);
 
   return (
-    <div ref={containerRef} className="w-full h-screen">
-      <svg ref={svgRef}>
+    <div ref={containerRef} className="w-full h-screen bg-transparent relative">
+      <svg ref={svgRef} className="w-full h-full">
         <g>
           {links.map((link) => {
             const sourceNode = nodes.find((n) => n.id === link.source);
             const targetNode = nodes.find((n) => n.id === link.target);
-            if (!sourceNode || !targetNode) {
-              console.error('PTree render: Missing node for link', link);
-              return null;
-            }
-            console.log('PTree render: Rendering link', link);
+            if (!sourceNode || !targetNode) return null;
             return (
               <NodeLink
                 key={`${link.source}-${link.target}`}
@@ -124,21 +123,35 @@ const PTree: React.FC = () => {
               />
             );
           })}
-          {nodes.map((node) => {
-            console.log('PTree render: Rendering node', node);
-            return (
+          {nodes.map((node) =>
+            node.id === 'root' ? (
+              <RootNode
+                key={node.id}
+                node={node}
+                onAddNode={() => {}}
+                onUpdateNode={updateNode}
+              />
+            ) : (
               <Node
                 key={node.id}
                 node={node}
-                onAddNode={(type) => {
-                  console.log('PTree: Node onAddNode called', { nodeId: node.id, type });
-                  addNode(node.id, type);
-                }}
+                onAddNode={(type) => addNode(node.id, type, '', '')}
               />
-            );
-          })}
+            )
+          )}
         </g>
       </svg>
+      {showBottomPrompt && (
+        <div className="fixed bottom-0 left-0 w-3/5 bg-zinc-800/50 p-4 flex items-center justify-center">
+          <PromptBox
+            onSubmit={(prompt) => {
+              const parentId = nodes[nodes.length - 1].id;
+              const dummyAnswer = dummyData[Math.floor(Math.random() * dummyData.length)];
+              addNode(parentId, 'followup', prompt, `${dummyAnswer} for: ${prompt}`);
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };

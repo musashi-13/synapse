@@ -20,13 +20,11 @@
     "@tanstack/react-router": "^1.121.2",
     "@tanstack/react-router-devtools": "^1.121.2",
     "@tanstack/router-plugin": "^1.121.2",
-<<<<<<< HEAD
     "@types/d3": "^7.4.3",
     "d3": "^7.9.0",
-=======
     "dotenv": "^17.0.1",
+    "jotai": "^2.12.5",
     "pg": "^8.16.3",
->>>>>>> b1f739fa6dbe4cdba8b707ab24e50451c419d77f
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwindcss": "^4.0.6"

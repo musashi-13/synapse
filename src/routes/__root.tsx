@@ -9,6 +9,8 @@ import TanStackQueryLayout from '../integrations/tanstack-query/layout.tsx'
 
 import type { QueryClient } from '@tanstack/react-query'
 
+import { Provider } from 'jotai'
+
 interface MyRouterContext {
   queryClient: QueryClient
 }
@@ -17,12 +19,14 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: () => (
     <>
       <ClerkProvider>
+        <Provider>
         <Header />
 
         <Outlet />
         <TanStackRouterDevtools />
 
         <TanStackQueryLayout />
+        </Provider>
       </ClerkProvider>
     </>
   ),

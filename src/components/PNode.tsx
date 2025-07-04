@@ -1,22 +1,7 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import type { TreeNode } from '@/types/types';
+import { AskIcon, RepairIcon } from './Icons'; // Removed SendIcon since no textarea
 
-interface ButtonProps {
-  label: string;
-  color: string;
-  onClick: () => void;
-}
-
-const Button: React.FC<ButtonProps> = ({ label, color, onClick }) => {
-  return (
-    <button
-      className={`${color} text-white text-xs font-medium rounded-sm w-[35px] h-[20px] flex items-center justify-center`}
-      onClick={onClick}
-    >
-      {label}
-    </button>
-  );
-};
 interface NodeProps {
   node: TreeNode;
   onAddNode: (type: 'followup' | 'error' | 'sibling') => void;
@@ -25,49 +10,25 @@ interface NodeProps {
 const Node: React.FC<NodeProps> = ({ node, onAddNode }) => {
   return (
     <g transform={`translate(${node.x}, ${node.y})`}>
-      <rect
-        width="120"
-        height="60"
-        rx="5"
-        className={
-          node.type === 'root'
-            ? 'fill-blue-200 stroke-blue-500'
-            : node.type === 'error'
-            ? 'fill-red-200 stroke-red-500'
-            : 'fill-gray-200 stroke-gray-500'
-        }
-        strokeWidth="2"
-      />
-      <foreignObject x="0" y="0" width="120" height="100">
-        <div className="flex flex-col h-full">
-          <div className="flex-1 flex items-center px-2">
-            <span className="text-sm text-black">{node.prompt}</span>
+      <foreignObject x="0" y="0" width="800" height={node.height || 200}>
+        <div className="flex flex-col gap-2 h-full w-full bg-zinc-900/20 border-2 border-zinc-600/50 rounded-xl p-4">
+          <div className="flex flex-col gap-4">
+            <p className="text-zinc-200 text-sm">{node.prompt}</p>
+            {node.answer && <p className="text-zinc-400 text-sm">{node.answer}</p>}
           </div>
           <div className="flex gap-1 px-1 pb-1">
-            <Button
-              label="Follow"
-              color="bg-green-500"
-              onClick={() => {
-                console.log(`PNode: Follow button clicked for node ${node.id}`);
-                onAddNode('followup');
-              }}
-            />
-            <Button
-              label="Error"
-              color="bg-red-500"
-              onClick={() => {
-                console.log(`PNode: Error button clicked for node ${node.id}`);
-                onAddNode('error');
-              }}
-            />
-            <Button
-              label="Sibling"
-              color="bg-yellow-500"
-              onClick={() => {
-                console.log(`PNode: Sibling button clicked for node ${node.id}`);
-                onAddNode('sibling');
-              }}
-            />
+            <button
+              className="font-semibold rounded-full bg-zinc-900/20 border-2 border-zinc-600/50 p-2"
+              onClick={() => onAddNode('error')}
+            >
+              <RepairIcon />
+            </button>
+            <button
+              className="font-semibold rounded-full bg-zinc-900/20 border-2 border-zinc-600/50 p-2"
+              onClick={() => onAddNode('sibling')}
+            >
+              <AskIcon />
+            </button>
           </div>
         </div>
       </foreignObject>

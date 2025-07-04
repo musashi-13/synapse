@@ -9,9 +9,8 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 
-    background-color: #2D2727;
-    opacity: 0.8;
-    background-image: radial-gradient(#4e4e4e 1.5px, #2D2727 1.5px);
+    background-color: #222427;
+    background-image: radial-gradient(#454242 1.5px, #222427 1.5px);
     background-size: 40px 40px;
 
 }
