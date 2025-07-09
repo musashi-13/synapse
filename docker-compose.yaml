@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  node-server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    env_file:
+      - ./server/.env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - python
+    networks:
+      - synapse-net
+      - python-net
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+
+  python:
+    build:
+      context: ./backend/summarise
+      dockerfile: Dockerfile
+    expose:
+      - "5000"
+    networks:
+      - python-net
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    env_file: # <--- ADD THIS LINE
+      - ./.env
+
+networks:
+  synapse-net:
+  python-net:
