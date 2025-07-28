@@ -1,7 +1,8 @@
 import { useState, useRef } from 'react';
-import { FilePlus, Send } from 'lucide-react'; // Ensure you have this package installed
-// IMPORTANT: Adjust this import path to where your Icons are located.
-import { SendIcon, UploadDocumentIcon } from './Icons';
+import { useAuth, useUser } from '@clerk/clerk-react';
+import type { ApiTypes } from '../api/types';
+import { createNode } from '@/api/client';
+import { FilePlus, Send } from 'lucide-react';
 
 interface PromptBoxProps {
   onSubmit: (prompt: string) => void;
@@ -34,7 +35,42 @@ export default function PromptBox({ onSubmit }: PromptBoxProps) {
       }
     }
   };
+  const { getToken } = useAuth();
+  const { user } = useUser();
 
+  const handleTest = async () => {
+    console.log("Test button clicked");
+
+    if (!user) {
+      console.error("User not available");
+      return;
+    }
+
+    const token = await getToken();
+    if (!token) {
+      console.error("Token not available");
+      return;
+    }
+
+    const email = user.primaryEmailAddress?.emailAddress;
+    if (!email) {
+      console.error("Email not available");
+      return;
+    }
+
+    const payload: ApiTypes.CreateNodeRequest = {
+      user_content: "Tell me the capital of France",
+      user_email: 'kaushik.bhat@test.dev',
+    };
+
+    try {
+        console.log(payload)
+      const response = await createNode(token, payload);
+      console.log("createNode response:", response);
+    } catch (error) {
+      console.error("createNode error:", error);
+    }
+  };
 
   return (
     <div>
@@ -55,7 +91,7 @@ export default function PromptBox({ onSubmit }: PromptBoxProps) {
           }}
         />
         <div className="flex items-center w-full text-white">
-          <button type="button" className="p-1">
+          <button type="button" onClick={handleTest} className="p-1">
             <FilePlus size={20}/>
           </button>
           <div className="flex-grow text-sm text-right flex-shrink-0 p-1 mr-4">
@@ -69,3 +105,4 @@ export default function PromptBox({ onSubmit }: PromptBoxProps) {
     </div>
   );
 }
+

@@ -1,9 +1,8 @@
+// api.ts
 import ky from 'ky';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 export const Ky = ky.create({
-    prefixUrl: API_BASE_URL,
     hooks: {
         beforeRequest: [],
         beforeError: [],
