@@ -1,4 +1,4 @@
-import { StrictMode } from 'react'
+import React, { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 
@@ -38,6 +38,7 @@ if (rootElement && !rootElement.innerHTML) {
       <TanStackQueryProvider.Provider>
         <RouterProvider router={router} />
       </TanStackQueryProvider.Provider>
+
     </StrictMode>,
   )
 }

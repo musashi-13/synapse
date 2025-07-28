@@ -16,3 +16,4 @@ package-lock.json
 .dockerignore
 docker-compose.override.yml
 /data/
+/generated/prisma
