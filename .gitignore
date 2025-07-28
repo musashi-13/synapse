@@ -11,3 +11,4 @@ count.txt
 /backend/summarise/__pycache__/
 pnpm-lock.yaml
 package-lock.json
+/generated/prisma

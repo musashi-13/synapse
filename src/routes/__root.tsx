@@ -8,6 +8,7 @@ import ClerkProvider from '../integrations/clerk/provider.tsx'
 import TanStackQueryLayout from '../integrations/tanstack-query/layout.tsx'
 
 import type { QueryClient } from '@tanstack/react-query'
+import { ReactFlowProvider } from '@xyflow/react'
 
 import { Provider } from 'jotai'
 
@@ -19,14 +20,13 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: () => (
     <>
       <ClerkProvider>
-        <Provider>
-        <Header />
-
-        <Outlet />
-        <TanStackRouterDevtools />
-
-        <TanStackQueryLayout />
-        </Provider>
+        <ReactFlowProvider>
+            <Provider>
+                <Header />
+                <Outlet />
+                <TanStackRouterDevtools />
+            </Provider>
+        </ReactFlowProvider>
       </ClerkProvider>
     </>
   ),

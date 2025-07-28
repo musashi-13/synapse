@@ -9,75 +9,48 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ChatRouteImport } from './routes/chat'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DemoTanstackQueryRouteImport } from './routes/demo.tanstack-query'
-import { Route as DemoClerkRouteImport } from './routes/demo.clerk'
+import { Route as TestChatRouteImport } from './routes/test.chat'
 
-const ChatRoute = ChatRouteImport.update({
-  id: '/chat',
-  path: '/chat',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
-  id: '/demo/tanstack-query',
-  path: '/demo/tanstack-query',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoClerkRoute = DemoClerkRouteImport.update({
-  id: '/demo/clerk',
-  path: '/demo/clerk',
+const TestChatRoute = TestChatRouteImport.update({
+  id: '/test/chat',
+  path: '/test/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/chat': typeof ChatRoute
-  '/demo/clerk': typeof DemoClerkRoute
-  '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/test/chat': typeof TestChatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/chat': typeof ChatRoute
-  '/demo/clerk': typeof DemoClerkRoute
-  '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/test/chat': typeof TestChatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/chat': typeof ChatRoute
-  '/demo/clerk': typeof DemoClerkRoute
-  '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/test/chat': typeof TestChatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/chat' | '/demo/clerk' | '/demo/tanstack-query'
+  fullPaths: '/' | '/test/chat'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/chat' | '/demo/clerk' | '/demo/tanstack-query'
-  id: '__root__' | '/' | '/chat' | '/demo/clerk' | '/demo/tanstack-query'
+  to: '/' | '/test/chat'
+  id: '__root__' | '/' | '/test/chat'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ChatRoute: typeof ChatRoute
-  DemoClerkRoute: typeof DemoClerkRoute
-  DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
+  TestChatRoute: typeof TestChatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/chat': {
-      id: '/chat'
-      path: '/chat'
-      fullPath: '/chat'
-      preLoaderRoute: typeof ChatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -85,18 +58,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/demo/tanstack-query': {
-      id: '/demo/tanstack-query'
-      path: '/demo/tanstack-query'
-      fullPath: '/demo/tanstack-query'
-      preLoaderRoute: typeof DemoTanstackQueryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/clerk': {
-      id: '/demo/clerk'
-      path: '/demo/clerk'
-      fullPath: '/demo/clerk'
-      preLoaderRoute: typeof DemoClerkRouteImport
+    '/test/chat': {
+      id: '/test/chat'
+      path: '/test/chat'
+      fullPath: '/test/chat'
+      preLoaderRoute: typeof TestChatRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -104,9 +70,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ChatRoute: ChatRoute,
-  DemoClerkRoute: DemoClerkRoute,
-  DemoTanstackQueryRoute: DemoTanstackQueryRoute,
+  TestChatRoute: TestChatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

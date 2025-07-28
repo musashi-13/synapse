@@ -1,3 +1,4 @@
+@layer theme, base, clerk, components, utilities;
 @import "tailwindcss";
 
 body {
@@ -12,6 +13,7 @@ body {
     background-color: #222427;
     background-image: radial-gradient(#454242 1.5px, #222427 1.5px);
     background-size: 40px 40px;
+    color: white
 
 }
 
