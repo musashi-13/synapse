@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  node-server-api:
+    build:
+      context: ./server_api
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - ai-engine
+    networks:
+      - synapse-net
+      - python-net
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+
+  ai-engine:
+    build:
+      context: ./ai_engine
+      dockerfile: Dockerfile
+    expose:
+      - "5000"
+    networks:
+      - python-net
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    env_file: # <--- ADD THIS LINE
+      - ./.env
+
+networks:
+  synapse-net:
+  python-net:
