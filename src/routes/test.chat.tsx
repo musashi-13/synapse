@@ -1,5 +1,4 @@
 // src/routes/test/chat.tsx
-
 import Conversations from '@/components/Conversations';
 import PromptBox from '@/components/PromptBox';
 import ReplyNode, { type NodeData } from '@/components/ReplyNode';
@@ -11,6 +10,9 @@ import { createNode } from '@/api/client';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { addToastAtom, toastsAtom, userPromptAtom } from '@/atoms';
 import Toast from '@/components/Toast';
+import { ReactFlow } from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
+import CustomControls from '@/components/CustomControls';
 
 export const Route = createFileRoute('/test/chat')({
     component: RouteComponent,
@@ -23,10 +25,21 @@ function RouteComponent() {
     const addToast = useSetAtom(addToastAtom);
 
     const [nodes, setNodes] = useState<NodeData[]>([]);
-
+    const initialNodes = [
+        {
+            id: 'n1',
+            position: { x: 0, y: 0 },
+            data: { label: 'Node 1' },
+            type: 'input',
+        },
+        {
+            id: 'n2',
+            position: { x: 100, y: 100 },
+            data: { label: 'Node 2' },
+        },
+    ];
     const { getToken } = useAuth();
     const { user } = useUser();
-
     // 2. The API submission logic now lives in the parent.
     const handleSubmit = async (submittedPrompt: string) => {
         if (!user || !getToken) {
@@ -70,8 +83,8 @@ function RouteComponent() {
         <div className='flex relative'>
             <Conversations />
             <div className='relative flex flex-col w-full items-center justify-center'>
-                <div className='relative flex flex-col items-center gap-6 p-4'>
-                        {/* 3. This section now maps over the `nodes` state. */}
+                <div className='relative flex flex-col w-full h-screen items-center gap-6 p-4'>
+                        {/* 3. This section now maps over the `nodes` state.
                         {nodes.length === 0 ? (
                             // If there are no nodes, show the welcome message.
                             <div className="text-center text-white">
@@ -83,7 +96,11 @@ function RouteComponent() {
                             nodes.map((node) => (
                                 <ReplyNode key={node.id} node={node} />
                             ))
-                        )}
+                        )} */}
+
+                        <ReactFlow nodes={initialNodes} fitView>
+                            <CustomControls />
+                        </ReactFlow>
                     </div>
                 <div className='absolute bottom-4 w-full flex justify-center'>
                     {/* 4. Pass the state and handlers down to PromptBox */}

@@ -26,6 +26,20 @@ body {
     animation: shrink-width 3s linear forwards;
 }
 
+.react-flow__attribution {
+    /* Change background color and add opacity */
+    background-color: rgba(24, 24, 27, 0.5) !important; /* zinc-900 at 50% opacity */
+
+    /* Add a blur effect */
+    backdrop-filter: blur(8px);
+
+    /* Adjust padding, border, and text color */
+    padding: 4px 8px !important;
+    border-radius: 6px !important;
+    border: 1px solid rgba(82, 82, 92, 0.5); /* zinc-600 at 50% opacity */
+    font-size: 10px !important;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
