@@ -38,3 +38,13 @@ export const removeToastAtom = atom(
         );
     }
 );
+
+
+export interface ConversationInfo {
+    id: string;
+    title: string;
+}
+
+// This atom will store an array of recent conversations in localStorage
+// so they persist across page reloads.
+export const conversationsAtom = atomWithStorage<ConversationInfo[]>('conversations', []);

@@ -1,5 +1,5 @@
 // src/routes/test/chat.tsx
-import Conversations from '@/components/Conversations';
+import Conversations from '@/components/Sidebar';
 import PromptBox from '@/components/PromptBox';
 import ReplyNode, { type NodeData } from '@/components/ReplyNode';
 import { useAuth, useUser } from '@clerk/clerk-react';

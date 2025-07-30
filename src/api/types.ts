@@ -17,6 +17,13 @@ export namespace ApiTypes {
         created_at: string;
         concise_context: string | null;
         conversation_id: string;
-    };
         
+    };
+    export type Conversation = {
+        id: string;
+        title: string;
+        user_email_id: string;
+        created_at: string;
+        updated_at: string;
+    };
 }
