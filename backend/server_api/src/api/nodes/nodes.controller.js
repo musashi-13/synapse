@@ -6,17 +6,11 @@ import * as nodesService from './nodes.service.js';
  */
 export const postNode = async (req, res, next) => {
     try {
-        // Destructure all possible inputs from the request body.
         const { user_content, conversation_id, branch_id, parent_node_id, user_email: body_email } = req.body;
         
-        // --- THIS IS THE CORRECTED LOGIC ---
-        // In production, user info will come from `req.auth` set by Clerk middleware.
-        // For testing with Postman, we allow overriding with data from the request body.
-        // A final fallback mock is used if neither is present.
-        const user_id = req.auth?.userId || 'user_mock_id_12345';
-        const user_email = body_email || req.auth?.userEmail || 'testuser@example.com';
-        // --- END OF CORRECTION ---
-
+        // We no longer need user_id. The user_email is the sole identifier.
+        const user_email = req.auth?.userEmail || body_email || 'testuser@example.com';
+        
         if (!user_content) {
             return res.status(400).json({ error: 'user_content is required.' });
         }
@@ -26,8 +20,8 @@ export const postNode = async (req, res, next) => {
         }
 
         const newNode = await nodesService.createNode({
-            user_id,
-            user_email, // Pass the now-guaranteed email to the service
+            // Pass user_email instead of user_id.
+            user_email,
             user_content,
             conversation_id,
             branch_id,
@@ -37,7 +31,7 @@ export const postNode = async (req, res, next) => {
         res.status(201).json(newNode);
 
     } catch (error) {
-        next(error); // Pass to global error handler
+        next(error);
     }
 };
 
