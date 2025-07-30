@@ -2,6 +2,7 @@
 import pool from '../../config/db.js';
 import axios from 'axios';
 import { findOrCreateUser } from '../users/users.service.js';
+import pythonApiClient from '../../utils/pythonApiClient.js';
 
 // --- Data Fetching Service ---
 
@@ -63,27 +64,24 @@ const getAiResponse = async (history, current_prompt) => {
  * 2. Triggers a non-blocking background job to generate the concise_context.
  * 3. Returns the newly created node to the user without waiting for the background job.
  */
+
 export const createNode = async (nodeData) => {
-    // Determine if this is the first node or a subsequent one.
     const newNode = nodeData.conversation_id
         ? await createSubsequentNode(nodeData)
         : await createNewConversationWithFirstNode(nodeData);
 
-    // --- THIS IS THE CORRECTED PART ---
-    // The port for the internal API call is now dynamic.
-    // It reads from the .env file (set to 8080), with a fallback to 8080.
-    const port = process.env.PORT || 8080;
-    axios.post(`http://localhost:${port}/api/nodes/${newNode.id}/generate-context`)
+    // --- THIS IS THE FIX ---
+    // Use the internal Docker network URL for the background task
+    const internalApiUrl = process.env.NODE_SERVER_API_INTERNAL_URL;
+
+    // Trigger the background task using the internal service URL
+    axios.post(`${internalApiUrl}/api/nodes/${newNode.id}/generate-context`)
         .catch(err => {
-            // If the background task fails, we log it for maintenance but do not crash the server.
             console.error(`[BACKGROUND_JOB_ERROR] Failed to trigger context generation for node ${newNode.id}:`, err.message);
         });
 
-    // Return the newly created node to the user right away.
     return newNode;
 };
-
-
 /**
  * Helper function to create a node in an existing conversation branch.
  */
@@ -147,23 +145,22 @@ const createNewConversationWithFirstNode = async ({ user_id, user_email, user_co
  * This function is called by the internal API endpoint, not directly by the user.
  * @param {string} nodeId - The ID of the node to process.
  */
+
 export const generateAndSaveConciseContext = async (nodeId) => {
-    // 1. Fetch the required data (prompt and response) from the newly created node.
     const nodeRes = await pool.query('SELECT user_content, ai_content FROM public.nodes WHERE id = $1', [nodeId]);
     if (nodeRes.rows.length === 0) {
-        throw new Error(`Node with ID ${nodeId} not found for context generation.`);
+        throw new Error(`Node with ID ${nodeId} not found.`);
     }
     const { user_content, ai_content } = nodeRes.rows[0];
 
-    // 2. Call the Python service's dedicated summarization endpoint.
-    const pythonApiUrl = process.env.PYTHON_AI_ENGINE_URL;
-    const summaryRes = await axios.post(`${pythonApiUrl}/summarize-turn`, {
+    // --- REFACTORED ---
+    // Use the pre-configured client for the summarization call as well
+    const summaryRes = await pythonApiClient.post('/summarize-turn', {
         user_prompt: user_content,
         ai_response: ai_content
     });
     const concise_context = summaryRes.data.concise_context;
 
-    // 3. Save the generated summary back to the database, filling in the previously NULL column.
     await pool.query('UPDATE public.nodes SET concise_context = $1 WHERE id = $2', [concise_context, nodeId]);
     console.log(`✅ Successfully generated and saved concise context for node ${nodeId}`);
 };
