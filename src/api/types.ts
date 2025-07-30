@@ -2,6 +2,9 @@ export namespace ApiTypes {
     export type CreateNodeRequest = {
         user_content: string;
         user_email: string;
+        conversation_id?: string;
+        branch_id?: string;
+        parent_node_id?: string;    
     }
 
     export type CreateNodeResponse = {

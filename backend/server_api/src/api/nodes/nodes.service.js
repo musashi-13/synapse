@@ -106,19 +106,25 @@ const createSubsequentNode = async ({ branch_id, parent_node_id, user_content })
 /**
  * Helper function to create the first node, which also creates the user, conversation, and main branch.
  */
-const createNewConversationWithFirstNode = async ({ user_id, user_email, user_content }) => {
+const createNewConversationWithFirstNode = async ({ user_email, user_content }) => {
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
-        await findOrCreateUser({ id: user_id, email: user_email }, client);
+        
+        // findOrCreateUser now only takes the email.
+        await findOrCreateUser(user_email, client);
+
         const title = user_content.substring(0, 50) + (user_content.length > 50 ? '...' : '');
-        const convResult = await client.query('INSERT INTO public.conversations (user_id, title) VALUES ($1, $2) RETURNING id;', [user_id, title]);
+        
+        // Insert into conversations using the user_email into the `user_email_id` column.
+        const convResult = await client.query('INSERT INTO public.conversations (user_email_id, title) VALUES ($1, $2) RETURNING id;', [user_email, title]);
         const newConversationId = convResult.rows[0].id;
+
         const branchResult = await client.query('INSERT INTO public.branches (conversation_id, name) VALUES ($1, $2) RETURNING id;', [newConversationId, 'main']);
         const newBranchId = branchResult.rows[0].id;
+        
         const ai_content = await getAiResponse([], user_content);
         
-        // Insert the root node. `concise_context` is initially NULL.
         const nodeQuery = `
             INSERT INTO public.nodes (branch_id, parent_node_id, depth, user_content, ai_content, context_for_api)
             VALUES ($1, NULL, 0, $2, $3, '[]')
@@ -126,7 +132,9 @@ const createNewConversationWithFirstNode = async ({ user_id, user_email, user_co
         `;
         const nodeResult = await client.query(nodeQuery, [newBranchId, user_content, ai_content]);
         const newNode = nodeResult.rows[0];
+        
         await client.query('COMMIT');
+        
         newNode.conversation_id = newConversationId;
         return newNode;
     } catch (error) {
