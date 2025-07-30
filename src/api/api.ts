@@ -12,5 +12,7 @@ export const Ky = ky.create({
         'Content-Type': 'application/json',
     },
     throwHttpErrors: true,
+    timeout: 15*1000,
 });
 
+ 

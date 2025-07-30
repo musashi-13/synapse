@@ -17,6 +17,15 @@ body {
 
 }
 
+@keyframes shrink-width {
+    from { width: 100%; }
+    to { width: 0%; }
+}
+
+.animate-shrink {
+    animation: shrink-width 3s linear forwards;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;

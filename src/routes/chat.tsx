@@ -12,7 +12,7 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { addToastAtom, toastsAtom, userPromptAtom } from '@/atoms';
 import Toast from '@/components/Toast';
 
-export const Route = createFileRoute('/test/chat')({
+export const Route = createFileRoute('/chat')({
     component: RouteComponent,
 });
 
@@ -74,15 +74,15 @@ function RouteComponent() {
                         {/* 3. This section now maps over the `nodes` state. */}
                         {nodes.length === 0 ? (
                             // If there are no nodes, show the welcome message.
-                            <div className="text-center text-white">
+                            (<div className="text-center text-white">
                                 <h1 className="text-3xl font-bold">Good Evening, {user?.firstName}</h1>
                                 <h2 className="text-xl text-zinc-400 mt-2">Elevate your project with Synapse!</h2>
-                            </div>
+                            </div>)
                         ) : (
                             // Otherwise, render a ReplyNode for each node in the state.
-                            nodes.map((node) => (
+                            (nodes.map((node) => (
                                 <ReplyNode key={node.id} node={node} />
-                            ))
+                            )))
                         )}
                     </div>
                 <div className='absolute bottom-4 w-full flex justify-center'>
@@ -103,5 +103,5 @@ function RouteComponent() {
                 ))}
             </div>
         </div>
-    );
+    )
 }
