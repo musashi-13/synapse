@@ -12,4 +12,7 @@ router.get('/', conversationsController.getAllConversations);
 // POST /api/conversations
 router.post('/', conversationsController.postConversation);
 
+// Route to get nodes of a conversation (optionally by branch)
+router.get('/:id/nodes', conversationsController.getNodesForConversation);
+
 export default router;
