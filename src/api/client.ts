@@ -12,10 +12,23 @@ export async function createNode(token: string, props: ApiTypes.CreateNodeReques
     }).json();
 }
 
-export async function fetchConversations(token: string): Promise<ApiTypes.Conversation[]> {
-    return Ky.get(routes.FETCH_CONVERSATIONS, {
+
+//change this to get request with token in header
+export async function fetchConversations(token: string, user_email: string): Promise<ApiTypes.Conversation[]> {
+    return Ky.post(routes.FETCH_CONVERSATIONS, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
+        body: JSON.stringify({user_email})
+    }).json();
+}
+
+//change this to get request with token in header
+export async function getConversationNodes(token: string, user_email: string, conversation_id: string): Promise<ApiTypes.Node[]> {
+    return Ky.post(`${routes.FETCH_CONVERSATIONS}/${conversation_id}/nodes`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({user_email})
     }).json();
 }

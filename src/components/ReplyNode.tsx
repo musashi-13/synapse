@@ -1,51 +1,33 @@
-// src/components/ReplyNode.tsx
-
 // IMPORTANT: Adjust this import path to where your Icons are located.
+import type { ApiTypes } from '@/api/types';
 import { DiscussIcon, DebugIcon } from './Icons';
-
+import ReactMarkdown from 'react-markdown';
 // --- TYPE DEFINITIONS ---
+import { Handle, Position, type NodeProps } from '@xyflow/react';
 
-// This type now matches the full API response object for a node.
-export type NodeData = {
-    id: string;
-    branch_id: string;
-    parent_node_id: string | null;
-    depth: number;
-    user_content: string;
-    ai_content: string;
-    context_for_api: string;
-    corrected_content: string | null;
-    is_corrected: boolean;
-    created_at: string;
-    concise_context: string | null;
-    conversation_id: string;
-};
 
-// The component now accepts a single `node` prop.
 interface ReplyNodeProps {
-    node: NodeData;
+  node: ApiTypes.Node;
 }
-
-interface SummaryBoxProps {
-    summary: string;
-}
-
 
 // --- COMPONENTS ---
 
-// The detailed view of a node, updated to show the AI response.
+// 2. The function signature is updated to destructure `data` instead of `node`.
 export default function ReplyNode({ node }: ReplyNodeProps) {
     return (
         <div className="flex flex-col text-white w-full max-w-[800px]">
             <div className="flex flex-col gap-4 p-4 border-2 border-zinc-600/50 bg-zinc-900/50 backdrop-blur-sm rounded-xl w-full">
                 {/* User's Prompt */}
                 <p className="w-full p-3 rounded-xl bg-zinc-800/80">
+                    {/* 3. Use `data` to access the properties */}
                     {node.user_content}
                 </p>
 
                 {/* AI's Response */}
                 <p className="w-full p-3 rounded-xl bg-zinc-700/60 whitespace-pre-wrap">
-                    {node.ai_content}
+                    <ReactMarkdown>
+                        {node.ai_content}
+                    </ReactMarkdown>
                 </p>
             </div>
 
@@ -62,9 +44,8 @@ export default function ReplyNode({ node }: ReplyNodeProps) {
     );
 }
 
-// The compact view of a node for when zoomed out.
-// This will likely use `node.concise_context` in the future.
-function SummaryBox({ summary }: SummaryBoxProps) {
+// The SummaryBox component remains unchanged.
+function SummaryBox({ summary }: { summary: string }) {
     return (
         <div className="p-3 border-2 text-white border-zinc-600/50 bg-zinc-900/80 backdrop-blur-sm rounded-lg max-w-[200px] w-full text-xs">
             {summary}

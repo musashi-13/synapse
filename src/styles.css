@@ -199,3 +199,39 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+
+
+.markdown-content h1,
+  .markdown-content h2,
+  .markdown-content h3 {
+    @apply font-bold mb-2;
+  }
+  .markdown-content h1 { @apply text-2xl; }
+  .markdown-content h2 { @apply text-xl; }
+  .markdown-content h3 { @apply text-lg; }
+
+  .markdown-content ul,
+  .markdown-content ol {
+    @apply list-inside list-disc pl-4 mb-4;
+  }
+  .markdown-content ol { @apply list-decimal; }
+
+  .markdown-content a {
+    @apply text-blue-400 underline;
+  }
+
+  .markdown-content p {
+    @apply mb-4;
+  }
+  
+  .markdown-content pre {
+    @apply bg-zinc-900 p-3 rounded-md my-4 text-sm whitespace-pre-wrap;
+  }
+
+  .markdown-content code {
+    @apply font-mono text-sm;
+  }
+
+  .markdown-content pre code {
+    @apply p-0 bg-transparent;
+  }

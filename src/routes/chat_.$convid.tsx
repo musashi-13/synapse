@@ -1,56 +1,75 @@
-import { useState, useEffect } from 'react';
+// chat_.$convid.tsx
 import { createFileRoute, useParams } from '@tanstack/react-router';
-import { useAtom } from 'jotai';
-import { userPromptAtom } from '@/atoms';
+import { useAtom, useSetAtom } from 'jotai';
+import { addToastAtom, userPromptAtom, type ConversationInfo } from '@/atoms';
 import Sidebar from '@/components/Sidebar';
 import PromptBox from '@/components/PromptBox';
-import ReplyNode, { type NodeData } from '@/components/ReplyNode';
-// You will need these for making API calls on this page
-// import { useAuth } from '@clerk/clerk-react';
-// import { createNode, getNodesForConversation } from '@/api/client';
+import ReplyNode from '@/components/ReplyNode';
+import { useConversationNodesQuery, useCreateNodeMutation } from '@/api/queries';
+import { useAuth, useUser } from '@clerk/clerk-react';
+import type { ApiTypes } from '@/api/types';
+import { createNode } from '@/api/client';
 
 export const Route = createFileRoute('/chat_/$convid')({
     component: ConversationComponent,
 });
 
+
 function ConversationComponent() {
     // Get the dynamic conversationId from the URL
     const { convid } = useParams({ from: '/chat_/$convid' });
-    const [prompt, setPrompt] = useAtom(userPromptAtom);
-    const [nodes, setNodes] = useState<NodeData[]>([]);
+    const [prompt, setPrompt] = useAtom(userPromptAtom);    
+    const { data: nodes, isLoading, isError, error } = useConversationNodesQuery(convid);
+    const { getToken } = useAuth();
+    const { user } = useUser();
+    const addToast = useSetAtom(addToastAtom);
+    const createNodeMutation = useCreateNodeMutation();
     
-    // This effect runs when the component loads to fetch the chat history
-    useEffect(() => {
-        const fetchHistory = async () => {
-            console.log(`Fetching nodes for conversation: ${convid}`);
-            // TODO: Create a new API endpoint and client function
-            // to fetch all nodes for a given conversationId.
-            // For example:
-            // const token = await getToken();
-            // const historyNodes = await getNodesForConversation(token, conversationId);
-            // setNodes(historyNodes);
-        };
-
-        fetchHistory();
-    }, [convid]); // It re-runs if the user navigates to a different conversation
-
     const handleSubmit = async (submittedPrompt: string) => {
-        // console.log(`Adding prompt `${submittedPrompt}` to conversation ${conversationId}`);
-        // TODO: Implement the API call to add a new node to this specific conversation.
-        // The payload to your `createNode` function will need to include the
-        // `conversation_id`, `branch_id`, and `parent_node_id`.
-        // For example:
-        // const latestNode = nodes[nodes.length - 1];
-        // const newNode = await createNode(token, {
-        //     user_content: submittedPrompt,
-        //     user_email: email,
-        //     conversation_id: conversationId,
-        //     branch_id: latestNode.branch_id,
-        //     parent_node_id: latestNode.id
-        // });
-        // setNodes(prev => [...prev, newNode]);
+        if (!user || !getToken) {
+            console.error("User or auth not available.");
+            return;
+        }
+
+        const token = await getToken();
+        const email = user.primaryEmailAddress?.emailAddress;
+
+        if (!token || !email) {
+            console.error("Token or email not available.");
+            return;
+        }
+        const latestNode = nodes && nodes.length > 0 ? nodes[nodes.length - 1] : null;
+
+        const payload: ApiTypes.CreateNodeRequest = {
+            user_content: submittedPrompt,
+            user_email: email,
+            conversation_id: convid,
+            branch_id: latestNode ? latestNode.branch_id : undefined,
+            parent_node_id: latestNode ? latestNode.id : undefined,
+        };
+        createNodeMutation.mutate(payload);
         setPrompt("");
     };
+
+    function Nodes() {
+        if (isLoading) {
+            return <div>Loading...</div>;
+        }
+        if (isError) {
+            return <div>Error: {(error as Error).message}</div>;
+        }
+        if (!nodes || nodes.length === 0) {
+            return <div>No messages yet. Start the conversation!</div>;
+        }
+        return (
+            <>
+                {nodes.map((node) => (
+                    <ReplyNode key={node.id} node={node} />
+                ))}
+            </>
+        );
+    }
+
 
     return (
         <div className='flex relative h-screen'>
@@ -58,10 +77,8 @@ function ConversationComponent() {
             <div className='relative flex flex-col w-full items-center'>
                 <div className='flex-grow w-full overflow-y-auto pb-24'>
                     <div className='relative flex flex-col items-center gap-6 p-4'>
-                        {/* This page now maps over its own `nodes` state */}
-                        {nodes.map((node) => (
-                            <ReplyNode key={node.id} node={node} />
-                        ))}
+                        
+                        <Nodes />
                     </div>
                 </div>
 

@@ -1,7 +1,7 @@
 // src/routes/test/chat.tsx
 import Conversations from '@/components/Sidebar';
 import PromptBox from '@/components/PromptBox';
-import ReplyNode, { type NodeData } from '@/components/ReplyNode';
+import ReplyNode from '@/components/ReplyNode';
 import { useAuth, useUser } from '@clerk/clerk-react';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
@@ -14,9 +14,19 @@ import { ReactFlow } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import CustomControls from '@/components/CustomControls';
 
+
 export const Route = createFileRoute('/test/chat')({
     component: RouteComponent,
 });
+
+
+
+const nodeTypes = {
+    replyNode: ReplyNode,
+}
+
+const defaultViewport = { x: 0, y: 0, zoom: 0.5 };
+
 
 function RouteComponent() {
     // 1. State for the prompt is now held in the parent.
@@ -24,20 +34,34 @@ function RouteComponent() {
     const toasts = useAtomValue(toastsAtom);
     const addToast = useSetAtom(addToastAtom);
 
-    const [nodes, setNodes] = useState<NodeData[]>([]);
+    const mockReplyNodeData: ApiTypes.Node = {
+        id: 'n1',
+        user_content: 'This is a sample prompt for the custom node.',
+        ai_content: 'This is the corresponding AI response that will be displayed inside the React Flow canvas.',
+        branch_id: 'branch-1',
+        parent_node_id: null,
+        depth: 0,
+        context_for_api: '[]',
+        corrected_content: null,
+        is_corrected: false,
+        created_at: new Date().toISOString(),
+        concise_context: 'Sample prompt and response.',
+        conversation_id: 'convo-1',
+    };
+
+
+    const [nodes, setNodes] = useState<ApiTypes.Node[]>([]);
     const initialNodes = [
         {
-            id: 'n1',
+            id: mockReplyNodeData.id,
             position: { x: 0, y: 0 },
-            data: { label: 'Node 1' },
-            type: 'input',
-        },
-        {
-            id: 'n2',
-            position: { x: 100, y: 100 },
-            data: { label: 'Node 2' },
+            data: mockReplyNodeData,
+            type: 'replyNode',
         },
     ];
+
+    // Create a mock data object that matches the `NodeData` type
+    
     const { getToken } = useAuth();
     const { user } = useUser();
     // 2. The API submission logic now lives in the parent.
@@ -98,7 +122,7 @@ function RouteComponent() {
                             ))
                         )} */}
 
-                        <ReactFlow nodes={initialNodes} fitView>
+                        <ReactFlow nodes={initialNodes} fitView  nodeTypes={nodeTypes} >
                             <CustomControls />
                         </ReactFlow>
                     </div>

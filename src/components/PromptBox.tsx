@@ -6,11 +6,12 @@ import { FilePlus, Send } from 'lucide-react';
 // 1. Update the props interface to receive state and handlers from the parent.
 interface PromptBoxProps {
     prompt: string;
+    disabled?: boolean;
     onPromptChange: (newPrompt: string) => void;
     onSubmit: (prompt: string) => void;
 }
 
-export default function PromptBox({ prompt, onPromptChange, onSubmit }: PromptBoxProps) {
+export default function PromptBox({ prompt, onPromptChange, onSubmit, disabled = false }: PromptBoxProps) {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     // 2. The local `useState` for the prompt is removed.
@@ -71,7 +72,7 @@ export default function PromptBox({ prompt, onPromptChange, onSubmit }: PromptBo
                     <div className="flex-grow text-sm text-right flex-shrink-0 p-1 mr-4">
                         Gemini 2.5 pro
                     </div>
-                    <button type="submit" className="p-2 rounded-full active:scale-90 duration-200">
+                    <button type="submit" disabled={disabled} className="p-2 rounded-full active:scale-90 duration-200">
                         <Send size={20} />
                     </button>
                 </div>
