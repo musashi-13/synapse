@@ -133,6 +133,9 @@ const createNewConversationWithFirstNode = async ({ user_email, user_content }) 
         const nodeResult = await client.query(nodeQuery, [newBranchId, user_content, ai_content]);
         const newNode = nodeResult.rows[0];
         
+        await client.query( 'UPDATE public.branches SET base_node_id = $1 WHERE id = $2',
+                            [newNode.id, newBranchId] );
+
         await client.query('COMMIT');
         
         newNode.conversation_id = newConversationId;
