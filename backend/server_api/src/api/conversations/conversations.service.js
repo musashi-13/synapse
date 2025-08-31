@@ -42,3 +42,34 @@ export const createConversation = async (userEmail, title) => {
         throw error;
     }
 };
+
+/**
+ * Fetches nodes for a conversation, optionally filtered by branch.
+ * @param {string} conversationId - The ID of the conversation.
+ * @param {string|null} branchId - Optional branch ID to filter nodes.
+ * @returns {Promise<Array>} List of nodes.
+ */
+export const findNodesForConversation = async (conversationId, branchId) => {
+    try {
+        let query = `
+            SELECT n.*
+            FROM public.nodes n
+            JOIN public.branches b ON n.branch_id = b.id
+            WHERE b.conversation_id = $1
+        `;
+        const params = [conversationId];
+
+        if (branchId) {
+            query += ' AND n.branch_id = $2';
+            params.push(branchId);
+        }
+
+        query += ' ORDER BY n.depth ASC, n.created_at ASC';
+
+        const { rows } = await pool.query(query, params);
+        return rows;
+    } catch (error) {
+        console.error('Error fetching nodes:', error);
+        throw error;
+    }
+};

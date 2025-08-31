@@ -41,3 +41,21 @@ export const postConversation = async (req, res, next) => {
         next(error);
     }
 };
+
+export const getNodesForConversation = async (req, res, next) => {
+    try {
+        const { id: conversationId } = req.params;
+        const branchId = req.query.branch_id; // optional filter
+        const userEmail = req.auth?.userEmail || req.body.user_email || 'testuser@example.com';
+
+        if (!userEmail) {
+            return res.status(401).json({ error: 'Unauthorized. User email is missing.' });
+        }
+
+        // Directly fetch nodes, no ownership check
+        const nodes = await conversationsService.findNodesForConversation(conversationId, branchId);
+        res.status(200).json(nodes);
+    } catch (error) {
+        next(error);
+    }
+};
